@@ -4,17 +4,22 @@ HOST = '127.0.0.1'
 PORT = 5000
 
 
-def create_server_socket(host: str, port: int) -> socket.socket:
+def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind((host, port))
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server_socket.bind((HOST, PORT))
     server_socket.listen()
-    print(f"Server listening on: {host}:{port}")
-    return server_socket
+
+    print(f"Server listening on: {HOST}:{PORT}")
+
+    while True:
+        client_socket, client_address = server_socket.accept()
+        print(f"Connected to client: {client_address}")
+
+        handle_client(client_socket, client_address)
 
 
-def handle_client_connection(client_socket: socket.socket, client_address: tuple) -> None:
-    print(f"Connected to client: {client_address}")
-
+def handle_client(client_socket, client_address):
     while True:
         data = client_socket.recv(1024).decode()
 
@@ -31,19 +36,6 @@ def handle_client_connection(client_socket: socket.socket, client_address: tuple
         client_socket.sendall(response.encode())
 
     client_socket.close()
-
-
-def start_server() -> None:
-    server_socket = create_server_socket(HOST, PORT)
-
-    try:
-        while True:
-            client_socket, client_address = server_socket.accept()
-            handle_client_connection(client_socket, client_address)
-    except KeyboardInterrupt:
-        print("\nServer shutting down.")
-    finally:
-        server_socket.close()
 
 
 if __name__ == "__main__":
