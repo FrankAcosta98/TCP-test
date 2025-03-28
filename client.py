@@ -4,32 +4,28 @@ HOST = '127.0.0.1'
 PORT = 5000
 
 
-def connect_to_server(host: str, port: int) -> socket.socket:
+def start_client():
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect((host, port))
-    print(f"Connected to server: {host}:{port}")
-    return client_socket
+    client_socket.connect((HOST, PORT))
+    print(f"Connected to server: {HOST}:{PORT}")
 
-
-def handle_server_communication(client_socket: socket.socket) -> None:
     try:
-        while True:
-            message = input("Input: ").strip()
-            client_socket.sendall(message.encode())
-
-            if message.upper() == "DESCONEXION":
-                print("Disconnecting from server.")
-                break
-
-            data = client_socket.recv(1024).decode()
-            print(f"Server -> {data}")
+        communicate_with_server(client_socket)
     finally:
         client_socket.close()
 
 
-def start_client() -> None:
-    client_socket = connect_to_server(HOST, PORT)
-    handle_server_communication(client_socket)
+def communicate_with_server(client_socket):
+    while True:
+        message = input("Input: ").strip()
+        client_socket.sendall(message.encode())
+
+        if message.upper() == "DESCONEXION":
+            print("Disconnecting from server.")
+            break
+
+        data = client_socket.recv(1024).decode()
+        print(f"Server -> {data}")
 
 
 if __name__ == "__main__":
